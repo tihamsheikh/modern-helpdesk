@@ -1,0 +1,14 @@
+{% extends 'base.html'%}
+
+{% block content%}
+<div class="container mt-4">
+    <h1>Sign up</h1>
+    <p>Everyone signs up as Student. Manager can promote students to Agent later.</p>
+
+    <form action="" method="post">
+        {% csrf_token  %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Sign up</button>
+    </form>
+</div>
+{% endblock content%}
