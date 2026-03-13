@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Student, Ticket
+from .models import Ticket, Comment, Student, Department
 
 
 class LoginForm(forms.Form):
@@ -72,3 +72,67 @@ class TicketForm(forms.ModelForm):
             "attachment": forms.ClearableFileInput(attrs={"class": "form-control"}),
             "mode": forms.RadioSelect(),
         }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ("content",)
+        widgets = {"content": forms.Textarea(attrs={"class": "form-control","placeholder": "Write your comment", "rows": 2})}
+
+
+class ManagerTicketUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ("status", "assiged_agent")#, "internal_note")
+        widgets = {
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "assiged_agent": forms.Select(attrs={"class": "form-select"}),
+            # "internal_note": forms.Textarea(attrs={"class": "form-control", "rows": 1, "placeholder": "Note"})
+        }
+
+    def __init__(self, *args, **kwargs):
+        kwargs.pop("ticket", None)
+        super().__init__(*args, **kwargs)
+
+        queryset = Student.objects.filter(is_agent=True).select_related("user").order_by("name")
+        self.fields["assiged_agent"].queryset = queryset
+
+
+class ManagerStudentUpdateForm(forms.Form):
+    student = forms.ModelChoiceField(
+        queryset=Student.objects.select_related("user").order_by("name"),
+        widget=forms.Select(attrs={"class": "form-select"}),
+        empty_label="Select student",
+    )
+    is_agent = forms.ChoiceField(
+        choices=(("true", "True"), ("false", "False")),
+        widget=forms.Select(attrs={"class": "form-select"}),
+        initial="false",
+    )
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.order_by("name"),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        empty_label="Select department",
+    )
+
+    def __init__(self, *args, **kwargs):
+        selected_student = kwargs.pop("student", None)
+        super().__init__(*args, **kwargs)
+        # refreshing
+        self.fields["student"].queryset = Student.objects.select_related("user").order_by("name")
+        self.fields["department"].queryset = Department.objects.order_by("name")
+
+        if selected_student is not None:
+            self.fields["student"].initial = selected_student
+            self.fields["is_agent"].initial = "true" if selected_student.is_agent else "false"
+            self.fields["department"].initial = selected_student.department
+
+
+class AgentTicketStatusForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ("status",)
+        widgets = {"status": forms.Select(attrs={"class": "form-select"})}
+

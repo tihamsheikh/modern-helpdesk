@@ -11,6 +11,7 @@ class Department(models.Model):
         DEBUGGERS = "Debuggers", "Debuggers"
         TESTERS = "Testers", "Testers"
         EXICUTIONERS = "Exicutioners", "Exicutioners"
+        EXTORTIONERS = "Extortioners", "Extortioners"
 
     name = models.CharField(max_length=60, unique=True, choices=DepartmentName.choices)
 
@@ -31,15 +32,11 @@ class Student(models.Model):
         related_name="agents",
     )
 
-    def clean(self):
-        if self.department and not self.is_agent:
-            raise ValidationError({"department": "Only agents can be assigned to a department."})
-
     def __str__(self):
         role = "Manager" if self.user.is_superuser else ("Agent" if self.is_agent else "Student")
         return f"{self.name} ({self.roll}) - {role}"
 
-
+#TODO: use this to add agent updataion and add internal notes sections :(((
 class Ticket(models.Model):
     class TicketMode(models.TextChoices):
         ONLINE = "online", "Online"
@@ -56,11 +53,23 @@ class Ticket(models.Model):
     description = models.TextField()
     department = models.ForeignKey(Department, on_delete=models.PROTECT, related_name="tickets")
     attachment = models.FileField(upload_to="ticket_attachments/", blank=True, null=True)
-    mode = models.CharField(max_length=10, choices=TicketMode.choices)
+    mode = models.CharField(
+        max_length=10, 
+        choices=TicketMode.choices,
+        default=TicketMode.ONLINE
+    )
     status = models.CharField(
         max_length=20,
         choices=TicketStatus.choices,
         default=TicketStatus.UNREAD,
+    )
+    assiged_agent = models.ForeignKey(
+        Student,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_tickets",
+        limit_choices_to={"is_agent": True},
     )
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -68,11 +77,24 @@ class Ticket(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
-    # def clean(self):
-    #     if self.created_by_id:
-    #         student_profile = getattr(self.created_by, "student_profile", None)
-    #         if student_profile is None or student_profile.is_agent or self.created_by.is_superuser:
-    #             raise ValidationError("Only students can create tickets.")
-
     def __str__(self):
         return f"#{self.ticket_id} - {self.title}"
+
+
+class Comment(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    content = models.TextField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on Ticket {self.ticket.user_ticket_id}"
+
+
+
+
+
+

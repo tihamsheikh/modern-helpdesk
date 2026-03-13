@@ -5,16 +5,16 @@ from .models import Department, Student, Ticket
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
-    # list_display = ("name",)
-    # search_fields = ("name",)
-    pass
+    list_display = ("name",)
+    search_fields = ("name",)
+    
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    # list_display = ("name", "roll", "username", "is_agent", "department", "is_manager")
-    # list_filter = ("is_agent", "department")
-    # search_fields = ("name", "roll", "user__username")
-    # actions = ["make_agent", "remove_agent"]
+    list_display = ("name", "roll", "username", "is_agent", "department", "is_manager")
+    list_filter = ("is_agent", "department")
+    search_fields = ("name", "roll", "user__username")
+    actions = ["make_agent", "remove_agent"]
 
     @admin.display(ordering="user__username", description="Username")
     def username(self, obj):
@@ -40,8 +40,8 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    # list_display = ("ticket_id", "title", "created_by", "department", "mode", "status", "created_at")
-    # list_filter = ("status", "department", "mode")
-    # search_fields = ("title", "description", "created_by__username")
-    # readonly_fields = ("ticket_id", "created_at")
-    pass
+    list_display = ("ticket_id", "title", "created_by", "assiged_agent", "department", "mode", "status", "created_at")
+    list_filter = ("status", "department", "mode", "assiged_agent")
+    search_fields = ("title", "description", "created_by__username")
+    readonly_fields = ("ticket_id", "created_at")
+    

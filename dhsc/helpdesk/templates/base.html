@@ -1,73 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
-    <title>HOME | DHSC</title>
+    {% if request.resolver_match.url_name == 'base' %}
+        <title>Home | DHSC</title>
+    {% elif request.resolver_match.url_name == 'login' %}
+        <title> Login | DHSC </title>
+    {% elif request.resolver_match.url_name == 'register' %}
+        <title> Register | DHSC </title>
+    {% else %}
+        <title> DHSC </title>
+    {% endif %}
 </head>
+
 <body>
     {% include 'navbar.html' %}
-    <div class="container mt-4">    
+    <div class="container mt-4">
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>{{ message }}</strong> 
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
     </div>
 
     {% block content%}
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h4 mb-0">All Tickets</h1>
-            {% if can_create_ticket %}
-                <a href="{% url 'create_ticket' %}" class="btn btn-primary">Create Ticket</a>
-            {% endif %}
-        </div>
+    
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped align-middle">
-                <thead>
-                    <tr>
-                        <th>Ticket ID</th>
-                        <th>Username</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        <th>Attachment</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ticket in tickets %}
-                    <tr>
-                        <td>#{{ ticket.user_ticket_id }}</td>
-                        <td>{{ ticket.created_by.username }}</td>
-                        <td>{{ ticket.department.name }}</td>
-                        <td>{{ ticket.get_status_display }}</td>
-                        <td>
-                            {% if ticket.attachment %}
-                                <a href="{{ ticket.attachment.url }}" target="_blank">View File</a>
-                            <!-- {% else %}
-                                - -->
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No tickets yet.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="container mt-4">
+        <h1 class="text-center">You are logged in as {{ user.username}}.</h1>
     </div>
     {% endblock content%}
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
